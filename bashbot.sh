@@ -12,7 +12,7 @@
 # This file is public domain in the USA and all free countries.
 # If you're in Europe, and public domain does not exist, then haha.
 
-TOKEN='tokenhere'
+TOKEN=$1
 URL='https://api.telegram.org/bot'$TOKEN
 MSG_URL=$URL'/sendMessage'
 PHO_URL=$URL'/sendPhoto'
@@ -81,12 +81,26 @@ process_client() {
 	local MESSAGE=$1
 	local TARGET=$2
 	local PHOTO_ID=$3
+	local MESSAGECMD=$(echo $MESSAGE | awk '{print $1}')
+	local MESSAGEARG=$(echo $MESSAGE | awk '{$1=""; print $0}')
 	local msg=""
 	local copname="CO$TARGET"
 	local copidname="$copname/pid"
 	local copid="$(cat $copidname 2>/dev/null)"
 	if [ "$copid" = "" ]; then
-		case $MESSAGE in
+		case $MESSAGECMD in
+			'/wikipedia')
+				local wikipage=$(curl -s --get --data-urlencode "q=site:it.wikipedia.org $MESSAGEARG" http://ajax.googleapis.com/ajax/services/search/web?v=1.0 | sed 's/"unescapedUrl":"\([^"]*\).*/\1/;s/.*GwebSearch",//')
+			   send_message "$TARGET" "$wikipage"	
+				;;
+			'/archwiki')
+				local wikipage=$(curl -s --get --data-urlencode "q=site:wiki.archlinux.org $MESSAGEARG" http://ajax.googleapis.com/ajax/services/search/web?v=1.0 | sed 's/"unescapedUrl":"\([^"]*\).*/\1/;s/.*GwebSearch",//')
+			   send_message "$TARGET" "$wikipage"	
+				;;
+			'/debianwiki')
+				local wikipage=$(curl -s --get --data-urlencode "q=site:wiki.debian.org $MESSAGEARG" http://ajax.googleapis.com/ajax/services/search/web?v=1.0 | sed 's/"unescapedUrl":"\([^"]*\).*/\1/;s/.*GwebSearch",//')
+			   send_message "$TARGET" "$wikipage"	
+				;;
 			'/question')
 				startproc "$copname" "$TARGET"&
 				;;
@@ -94,10 +108,8 @@ process_client() {
 				send_message "$TARGET" "This is bashbot, the Telegram bot written entirely in bash."
 				;;
 			'/start')
-				send_message "$TARGET" "This is bashbot, the Telegram bot written entirely in bash.
-Features background tasks and interactive chats.
-Can serve as an interface for cli programs.
-Currently can send messages, custom keyboards and photos.
+				send_message "$TARGET" "Cordiali sauti dal bot di Unix Italia
+Vieni a trovarci su Facebook: https://www.facebook.com/groups/1543533979295934
 
 Available commands:
 /start: Start bot and get this message.
@@ -105,8 +117,10 @@ Available commands:
 /question: Start interactive chat.
 /cancel: Cancel any currently running interactive chats.
 
-Written by @topkecleon, Juan Potato (@awkward_potato), Lorenzo Santina (BigNerd95) and Daniil Gentili (danog)
-https://github.com/topkecleon/telegram-bot-bash
+I nostri comandi
+/wikipedia: cerca su wikipedia
+/archwiki: cerca nella wiki di arch
+/debianwiki: cerca nella wiki di debian
 "
 				;;
 			*)
