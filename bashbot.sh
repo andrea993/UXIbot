@@ -53,12 +53,17 @@ send_photo() {
 }
 
 startproc() {
-	local copname="$1"
+	local copname=$1
+	copname=${copname//-/}
 	local TARGET="$2"
+	echo $copname $TARGET 
 	mkdir -p "$copname"
 	mkfifo $copname/out
-	tmux new-session -d -n $copname "./question 2>&1>$copname/out"
-	local pid=$(ps aux | sed '/tmux/!d;/'$copname'/!d;/sed/d;s/'$USER'\s*//g;s/\s.*//g')
+	#tmux new-session -d -n $copname "./question 2>&1>$copname/out"
+	#local pid=$(ps aux | sed '/tmux/!d;/'$copname'/!d;/sed/d;s/'$USER'\s*//g;s/\s.*//g')
+	#tmux new-session -d -n "./question 2>&1>$copname/out"
+	tmux new-session -d -n "./question"
+	local pid=$(ps aux | grep "/question 2>&1>$copname/out" | grep -v grep | awk '{ print $2 }')
 	echo $pid>$copname/pid
 	while ps aux | grep -v grep | grep -q $pid;do
 		read -t 10 line
