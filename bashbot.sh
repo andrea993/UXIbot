@@ -104,7 +104,7 @@ process_client() {
 				send_message "$TARGET" "$(searchURLbykey "site:wiki.archlinux.org $MESSAGEARG")"
 				;;
 			'/debianwiki')
-				send_message "$TARGET" "$(searchURLbykey	"site:it.wikipedia.org $MESSAGEARG")"
+				send_message "$TARGET" "$(searchURLbykey	"site:wiki.debian.org $MESSAGEARG")"
 				;;
 			'/question')
 				startproc "$copname" "$TARGET"&
