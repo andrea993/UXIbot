@@ -90,6 +90,12 @@ searchURLbykey() {
 	echo $url
 }
 
+isAnAdmin() {
+   local e
+	for e in $ADMINS; do [[ "$e" == "$1" ]] && return 0; done
+	return 1
+}
+
 process_client() {
 	local MESSAGE=$1
 	local TARGET=$2
@@ -137,7 +143,7 @@ Comandi per soli amministratori:
 				#send_message "$TARGET" "$MESSAGE" #ripete i comandi
 		esac
 		#ADMIN commands
-		if [[ $ADMINS == *$USERNAME* ]] ;then	
+		if isAnAdmin $USERNAME ;then	
 			case $MESSAGECMD in
 				'/say')
 					for i in {1..10} ;do
@@ -160,7 +166,8 @@ Comandi per soli amministratori:
 
 while true; do {
 
-	res=$(curl -s $UPD_URL$OFFSET)
+
+res=$(curl -s $UPD_URL$OFFSET)
 
 	TARGET=$(echo $res | ./JSON.sh | egrep '\["result",0,"message","chat","id"\]' | cut -f 2)
 	OFFSET=$(echo $res | ./JSON.sh | egrep '\["result",0,"update_id"\]' | cut -f 2)
