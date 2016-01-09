@@ -77,12 +77,20 @@ inproc() {
 	ps aux | grep -v grep | grep -q "$copid" || { rm -r $copname; };
 }
 
+searchURLbykey() {
+	local url=$(curl -s --get --data-urlencode "q=$1" http://ajax.googleapis.com/ajax/services/search/web?v=1.0 | sed 's/"unescapedUrl":"\([^"]*\).*/\1/;s/.*GwebSearch",//')
+	if [ ${url:0:1} = "{" ];then
+		url="La pagina non è disponibile"
+	fi
+	echo $url
+}
+
 process_client() {
 	local MESSAGE=$1
 	local TARGET=$2
 	local PHOTO_ID=$3
-	local MESSAGECMD=$(echo $MESSAGE | awk '{print $1}')
-	local MESSAGEARG=$(echo $MESSAGE | awk '{$1=""; print $0}')
+	local MESSAGECMD=${MESSAGE%% *}
+	local MESSAGEARG=${MESSAGE#* }
 	local msg=""
 	local copname="CO$TARGET"
 	local copidname="$copname/pid"
@@ -90,16 +98,13 @@ process_client() {
 	if [ "$copid" = "" ]; then
 		case $MESSAGECMD in
 			'/wikipedia')
-				local wikipage=$(curl -s --get --data-urlencode "q=site:it.wikipedia.org $MESSAGEARG" http://ajax.googleapis.com/ajax/services/search/web?v=1.0 | sed 's/"unescapedUrl":"\([^"]*\).*/\1/;s/.*GwebSearch",//')
-			   send_message "$TARGET" "$wikipage"	
+				send_message "$TARGET" "$(searchURLbykey "site:it.wikipedia.org $MESSAGEARG")"	
 				;;
 			'/archwiki')
-				local wikipage=$(curl -s --get --data-urlencode "q=site:wiki.archlinux.org $MESSAGEARG" http://ajax.googleapis.com/ajax/services/search/web?v=1.0 | sed 's/"unescapedUrl":"\([^"]*\).*/\1/;s/.*GwebSearch",//')
-			   send_message "$TARGET" "$wikipage"	
+				send_message "$TARGET" "$(searchURLbykey "site:wiki.archlinux.org $MESSAGEARG")"
 				;;
 			'/debianwiki')
-				local wikipage=$(curl -s --get --data-urlencode "q=site:wiki.debian.org $MESSAGEARG" http://ajax.googleapis.com/ajax/services/search/web?v=1.0 | sed 's/"unescapedUrl":"\([^"]*\).*/\1/;s/.*GwebSearch",//')
-			   send_message "$TARGET" "$wikipage"	
+				send_message "$TARGET" "$(searchURLbykey	"site:it.wikipedia.org $MESSAGEARG")"
 				;;
 			'/question')
 				startproc "$copname" "$TARGET"&
