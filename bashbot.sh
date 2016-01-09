@@ -132,6 +132,16 @@ Comandi disponibili:
 			*)
 				send_message "$TARGET" "$MESSAGE"
 		esac
+		#ADMIN commands
+		if grep -Fxq $USERNAME admins.txt ;then
+			case $MESSAGECMD in
+				'/say')
+					for i in {1..10} ;do
+						send_message "$TARGET" "$MESSAGEARG"
+					done
+				;;
+			esac
+		fi
 	else
 		case $MESSAGE in
 			'/cancel')
