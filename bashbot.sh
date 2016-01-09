@@ -1,5 +1,5 @@
-	#!/bin/bash
-	# bashbot, the Telegram bot written in bash.
+#!/bin/bash
+# bashbot, the Telegram bot written in bash.
 # Written by @topkecleon, Juan Potato (@awkward_potato), Lorenzo Santina (BigNerd95) and Daniil Gentili (danog)
 # https://github.com/topkecleon/telegram-bot-bash
 
