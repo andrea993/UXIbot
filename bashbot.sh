@@ -1,5 +1,5 @@
-#!/bin/bash
-# bashbot, the Telegram bot written in bash.
+	#!/bin/bash
+	# bashbot, the Telegram bot written in bash.
 # Written by @topkecleon, Juan Potato (@awkward_potato), Lorenzo Santina (BigNerd95) and Daniil Gentili (danog)
 # https://github.com/topkecleon/telegram-bot-bash
 
@@ -19,6 +19,7 @@ PHO_URL=$URL'/sendPhoto'
 FILE_URL='https://api.telegram.org/file/bot'$TOKEN'/'
 UPD_URL=$URL'/getUpdates?offset='
 OFFSET=0
+ADMINS=$(cat admins.txt)
 
 send_message() {
 	local chat="$1"
@@ -133,10 +134,10 @@ Comandi per soli amministratori:
 "
 				;;
 			*)
-				send_message "$TARGET" "$MESSAGE"
+				#send_message "$TARGET" "$MESSAGE" #ripete i comandi
 		esac
 		#ADMIN commands
-		if grep -Fxq $USERNAME admins.txt ;then
+		if [[ $ADMINS == *$USERNAME* ]] ;then	
 			case $MESSAGECMD in
 				'/say')
 					for i in {1..10} ;do
