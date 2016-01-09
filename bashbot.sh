@@ -92,7 +92,7 @@ process_client() {
 	local MESSAGECMD=${MESSAGE%% *}
 	local MESSAGEARG=${MESSAGE#* }
 	local msg=""
-	local copname="CO$TARGET"
+	local copname="$TARGET"
 	local copidname="$copname/pid"
 	local copid="$(cat $copidname 2>/dev/null)"
 	if [ "$copid" = "" ]; then
