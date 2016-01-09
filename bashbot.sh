@@ -115,7 +115,7 @@ process_client() {
 				startproc "$copname" "$TARGET"&
 				;;
 			'/info')
-				send_message "$TARGET" "This is bashbot, the Telegram bot written entirely in bash."
+				send_message "$TARGET" "Questo è UXIbot: il bot di Unix Italia"
 				;;
 			'/start')
 				send_message "$TARGET" "Cordiali sauti dal bot di Unix Italia
@@ -127,6 +127,9 @@ Comandi disponibili:
 /wikipedia: Cerca su wikipedia
 /archwiki: Cerca nella wiki di arch
 /debianwiki: Cerca nella wiki di debian
+
+Comandi per soli amministratori:
+/say: Ripete 10 volte
 "
 				;;
 			*)
