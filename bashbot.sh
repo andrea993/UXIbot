@@ -19,7 +19,8 @@ PHO_URL=$URL'/sendPhoto'
 FILE_URL='https://api.telegram.org/file/bot'$TOKEN'/'
 UPD_URL=$URL'/getUpdates?offset='
 OFFSET=0
-ADMINS=$(cat admins.txt)
+cp -f admins.txt /tmp/admins #siccome il file è di uso frequente lo tengo in RAM
+#trap "rm -f /tmp/admins" 0 1 2 5 15
 
 send_message() {
 	local chat="$1"
@@ -91,8 +92,9 @@ searchURLbykey() {
 }
 
 isAnAdmin() {
-   local e
-	for e in $ADMINS; do [[ "$e" == "$1" ]] && return 0; done
+	while read e; do
+		[[ "$e" == "$1" ]] && return 0
+	done </tmp/admins
 	return 1
 }
 
@@ -134,11 +136,17 @@ Comandi disponibili:
 /wikipedia: Cerca su wikipedia
 /archwiki: Cerca nella wiki di arch
 /debianwiki: Cerca nella wiki di debian
+/lsadmin: Mostra gli admin
 
 Comandi per soli amministratori:
 /say: Ripete 10 volte
 /link: Link bot developers
+/addadmin: Aggiunge un admin
+/deladmin: Rimuove un admin
 "
+				;;
+				'/lsadmin')
+					send_message "$TARGET" "$(cat /tmp/admins)"
 				;;
 			*)
 				#send_message "$TARGET" "$MESSAGE" #ripete i comandi
@@ -151,7 +159,26 @@ Comandi per soli amministratori:
 						send_message "$TARGET" "$MESSAGEARG"
 					done
 				;;
-				'/link') send_message "$TARGET" '
+				'/addadmin')
+					if ! isAnAdmin $MESSAGEARG ;then
+						echo $MESSAGEARG >> admins.txt
+						cp -f admins.txt /tmp/admins
+						send_message "$TARGET" "$MESSAGEARG aggiunto tra gli admin"
+					else
+						send_message "$TARGET" "$MESSAGEARG è già un admin"
+					fi
+				;;
+				'/deladmin')
+					if isAnAdmin $MESSAGEARG ;then
+						sed "/$MESSAGEARG/d" /tmp/admins > ./admins.txt
+				      cp -f admins.txt /tmp/admins	
+					   send_message "$TARGET" "$MESSAGEARG rimosso dagli gli admin"
+					else
+						send_message "$TARGET" "$MESSAGEARG non è stato trovato tra gli admin"
+					fi
+				;;
+				'/link') 
+					send_message "$TARGET" '
 Github: https://github.com/andrea993/telegram-bot-bash
 BotFather: https://core.telegram.org/bots 
 API: https://core.telegram.org/bots/api
