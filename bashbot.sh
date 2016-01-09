@@ -61,8 +61,7 @@ startproc() {
 	mkfifo $copname/out
 	#tmux new-session -d -n $copname "./question 2>&1>$copname/out"
 	#local pid=$(ps aux | sed '/tmux/!d;/'$copname'/!d;/sed/d;s/'$USER'\s*//g;s/\s.*//g')
-	#tmux new-session -d -n "./question 2>&1>$copname/out"
-	tmux new-session -d -n "./question"
+	tmux new-session -d -n "./question 2>&1>$copname/out"
 	local pid=$(ps aux | grep "/question 2>&1>$copname/out" | grep -v grep | awk '{ print $2 }')
 	echo $pid>$copname/pid
 	while ps aux | grep -v grep | grep -q $pid;do
