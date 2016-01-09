@@ -61,7 +61,7 @@ startproc() {
 	mkfifo $copname/out
 	#tmux new-session -d -n $copname "./question 2>&1>$copname/out"
 	#local pid=$(ps aux | sed '/tmux/!d;/'$copname'/!d;/sed/d;s/'$USER'\s*//g;s/\s.*//g')
-	tmux new-session -d -n "./question 2>&1>$copname/out"
+	tmux new-session -d "./question 2>&1>$copname/out"
 	local pid=$(ps aux | grep "/question 2>&1>$copname/out" | grep -v grep | awk '{ print $2 }')
 	echo $pid>$copname/pid
 	while ps aux | grep -v grep | grep -q $pid;do
@@ -120,16 +120,12 @@ process_client() {
 				send_message "$TARGET" "Cordiali sauti dal bot di Unix Italia
 Vieni a trovarci su Facebook: https://www.facebook.com/groups/1543533979295934
 
-Available commands:
-/start: Start bot and get this message.
-/info: Get shorter info message about this bot.
-/question: Start interactive chat.
-/cancel: Cancel any currently running interactive chats.
-
-I nostri comandi
-/wikipedia: cerca su wikipedia
-/archwiki: cerca nella wiki di arch
-/debianwiki: cerca nella wiki di debian
+Comandi disponibili:
+/start: Avvia il bot e mostra questo messaggio
+/info: A proposito
+/wikipedia: Cerca su wikipedia
+/archwiki: Cerca nella wiki di arch
+/debianwiki: Cerca nella wiki di debian
 "
 				;;
 			*)
