@@ -124,14 +124,6 @@ process_client() {
 			'/info')
 				send_message "$TARGET" "Questo è UXIbot: il bot di Unix Italia"
 				;;
-			'/link') send_message "$TARGET" '
-Github: https://github.com/andrea993/telegram-bot-bash
-BotFather: https://core.telegram.org/bots 
-API: https://core.telegram.org/bots/api
-Curl:
-http://unnikked.ga/getting-started-with-telegram-bots/
-https://www.domoticz.com/wiki/Telegram_Bot#Using_Telegram_Bot_to_Send_Messages_with_Curl'
-				;;
 			'/start')
 				send_message "$TARGET" "Cordiali sauti dal bot di Unix Italia
 Vieni a trovarci su Facebook: https://www.facebook.com/groups/1543533979295934
@@ -145,6 +137,7 @@ Comandi disponibili:
 
 Comandi per soli amministratori:
 /say: Ripete 10 volte
+/link: Link bot developers
 "
 				;;
 			*)
@@ -157,6 +150,14 @@ Comandi per soli amministratori:
 					for i in {1..10} ;do
 						send_message "$TARGET" "$MESSAGEARG"
 					done
+				;;
+				'/link') send_message "$TARGET" '
+Github: https://github.com/andrea993/telegram-bot-bash
+BotFather: https://core.telegram.org/bots 
+API: https://core.telegram.org/bots/api
+Curl:
+http://unnikked.ga/getting-started-with-telegram-bots/
+https://www.domoticz.com/wiki/Telegram_Bot#Using_Telegram_Bot_to_Send_Messages_with_Curl'
 				;;
 			esac
 		fi
