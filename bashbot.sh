@@ -91,6 +91,13 @@ searchURLbykey() {
 	echo $url
 }
 
+searchIMGbyKey() {
+	local query=$(echo $1 | tr " " +)
+	local number=1
+	local url=$(wget --user-agent 'Mozilla/5.0' -qO - "www.google.be/search?q=$query\&tbm=isch" | sed 's/</\n</g' | grep '<img' | head -n"$number" | tail -n1 | sed 's/.*src="\([^"]*\)".*/\1/')
+	 wget -q -O /tmp/telegramimg.jpg $url
+ }
+
 isAnAdmin() {
 	while read e; do
 		[[ "$e" == "$1" ]] && return 0
@@ -104,6 +111,7 @@ process_client() {
 	local PHOTO_ID=$3
 	local USERNAME=$4
 	local MESSAGECMD=${MESSAGE%% *}
+	MESSAGECMD=$(echo $MESSAGECMD | cut -f1 -d"@") #per i comandi da click
 	local MESSAGEARG=${MESSAGE#* }
 	local msg=""
 	local copname="$TARGET"
@@ -120,13 +128,18 @@ process_client() {
 			'/debianwiki')
 				send_message "$TARGET" "$(searchURLbykey	"site:wiki.debian.org $MESSAGEARG")"
 				;;
+			'/imgsrc')
+				searchIMGbyKey "$MESSAGEARG"
+				send_photo	"$TARGET" "/tmp/telegramimg.jpg"
+				rm -f /tmp/telegramimg.jpg
+				;;
 			'/question')
 				startproc "$copname" "$TARGET"&
 				;;
 			'/info')
 				send_message "$TARGET" "Questo è UXIbot: il bot di Unix Italia"
 				;;
-			'/start')
+			'/start' | '/help')
 				send_message "$TARGET" "Cordiali sauti dal bot di Unix Italia
 Vieni a trovarci su Facebook: https://www.facebook.com/groups/1543533979295934
 
@@ -136,6 +149,7 @@ Comandi disponibili:
 /wikipedia: Cerca su wikipedia
 /archwiki: Cerca nella wiki di arch
 /debianwiki: Cerca nella wiki di debian
+/imgsrc: Cerca la minatura di un'immagine
 /lsadmin: Mostra gli admin
 
 Comandi per soli amministratori:
