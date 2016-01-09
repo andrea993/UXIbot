@@ -93,6 +93,7 @@ process_client() {
 	local MESSAGE=$1
 	local TARGET=$2
 	local PHOTO_ID=$3
+	local USERNAME=$4
 	local MESSAGECMD=${MESSAGE%% *}
 	local MESSAGEARG=${MESSAGE#* }
 	local msg=""
@@ -152,10 +153,12 @@ while true; do {
 	MESSAGE=$(echo $res | ./JSON.sh -s | egrep '\["result",0,"message","text"\]' | cut -f 2 | cut -d '"' -f 2)
 	PHOTO_ID=$(echo $res | ./JSON.sh -s | egrep '\["result",0,"message","photo",.*,"file_id"\]' | cut -f 2 | cut -d '"' -f 2 | sed -n '$p')
 
+	USERNAME=$(echo $res | ./JSON.sh -s | egrep '\["result",0,"message","from","username"\]' | cut -f 2 | cut -d '"' -f 2)
+
 	OFFSET=$((OFFSET+1))
 
 	if [ $OFFSET != 1 ]; then
-		process_client "$MESSAGE" "$TARGET" "$PHOTO_ID"&
+		process_client "$MESSAGE" "$TARGET" "$PHOTO_ID" "$USERNAME"&
 	fi
 
 }; done
