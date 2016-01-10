@@ -129,6 +129,15 @@ process_client() {
 			'/debianwiki')
 				send_message "$TARGET" "$(searchURLbykey	"site:wiki.debian.org $MESSAGEARG")"
 				;;
+			'/ubuntuwiki')
+				send_message "$TARGET" "$(searchURLbykey	"site:wiki.ubuntu.com $MESSAGEARG")"
+				;;
+			'/ubuntuwiki-it')
+				send_message "$TARGET" "$(searchURLbykey	"site:wiki.ubuntu-it.org $MESSAGEARG")"
+				;;
+			'/fbsdwiki')
+				send_message "$TARGET" "$(searchURLbykey	"site:wiki.freebsd.org $MESSAGEARG")"
+				;;
 			'/imgsrc')
 				searchIMGbyKey "$MESSAGEARG"
 				send_photo	"$TARGET" "/tmp/telegramimg.jpg"
@@ -150,6 +159,9 @@ Comandi disponibili:
 /wikipedia: Cerca su wikipedia
 /archwiki: Cerca nella wiki di arch
 /debianwiki: Cerca nella wiki di debian
+/ubuntuwiki: Cerca nella wiki di ubuntu in inglese
+/ubuntuwiki-it: Cerca nella wiki di ubuntu in italiano
+/fbsdwiki: Cerca nella wiki di freeBSD
 /imgsrc: Cerca la minatura di un'immagine
 /lsadmin: Mostra gli admin
 
