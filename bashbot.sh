@@ -233,7 +233,7 @@ Comandi per soli amministratori:
 				;;
 				'/link') 
 					send_message "$TARGET" '
-Github: https://github.com/andrea993/telegram-bot-bash
+Github: https://github.com/andrea993/UXIbot
 BotFather: https://core.telegram.org/bots 
 API: https://core.telegram.org/bots/api
 Curl:
