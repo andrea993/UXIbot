@@ -182,6 +182,7 @@ Comandi disponibili:
 /wikipedia: Cerca su wikipedia
 /archwiki: Cerca nella wiki di arch
 /debianwiki: Cerca nella wiki di debian
+/gentoowiki: Cerca nella wiki di gentoo
 /ubuntuwiki: Cerca nella wiki di ubuntu in inglese
 /ubuntuwiki-it: Cerca nella wiki di ubuntu in italiano
 /fbsdwiki: Cerca nella wiki di freeBSD
