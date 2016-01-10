@@ -146,6 +146,9 @@ process_client() {
 			'/debianwiki')
 				send_message "$TARGET" "$(searchURLbykey	"site:wiki.debian.org $MESSAGEARG")"
 				;;
+			'/gentoowiki')
+				send_message "$TARGET" "$(searchURLbykey "site:wiki.gentoo.org $MESSAGEARG")"
+				;;
 			'/ubuntuwiki')
 				send_message "$TARGET" "$(searchURLbykey	"site:wiki.ubuntu.com $MESSAGEARG")"
 				;;
