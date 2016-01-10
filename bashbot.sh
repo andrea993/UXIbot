@@ -155,6 +155,9 @@ process_client() {
 			'/fbsdwiki')
 				send_message "$TARGET" "$(searchURLbykey	"site:wiki.freebsd.org $MESSAGEARG")"
 				;;
+			'/github')
+				send_message "$TARGET" "$(searchURLbykey	"site:github.com $MESSAGEARG")"
+				;;
 			'/imgsrc')
 				searchIMGbyKey "$MESSAGEARG"
 				send_photo	"$TARGET" "/tmp/telegramimg.jpg"
@@ -168,7 +171,7 @@ process_client() {
 				;;
 			'/start' | '/help')
 				send_message "$TARGET" "Cordiali sauti dal bot di Unix Italia
-Vieni a trovarci su Facebook: https://www.facebook.com/groups/1543533979295934
+Vieni a trovarci su Facebook: https://www.facebook.com/groups/unixitaliagroup
 
 Comandi disponibili:
 /start: Avvia il bot e mostra questo messaggio
@@ -179,7 +182,8 @@ Comandi disponibili:
 /ubuntuwiki: Cerca nella wiki di ubuntu in inglese
 /ubuntuwiki-it: Cerca nella wiki di ubuntu in italiano
 /fbsdwiki: Cerca nella wiki di freeBSD
-/man: Mostra la descrizione e il link al manuale
+/github: Cerca un progetto o un developer su github
+/man: Mostra la descrizione e il link di una pagina di manuale
 /imgsrc: Cerca la minatura di un'immagine
 /lsadmin: Mostra gli admin
 
