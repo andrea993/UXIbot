@@ -99,6 +99,7 @@ searchIMGbyKey() {
  }
 
  getManDesc() {
+	 [ "$1" == "" ] && return 
 	 local txt=$(bash -c "LANG="C" man $1 | col -b" 2> /dev/null)
 	 if [ "$txt" == "" ]; then echo "Non c'è il manuale per $1" ; return; fi
 	 echo $1 | tr '[:lower:]' '[:upper:]'
@@ -107,7 +108,10 @@ searchIMGbyKey() {
 	 local i=0
 	 while [ ${array[$i]} != "DESCRIPTION" ] && (( $i < ${#array[@]} )); do let i+=1; done 
 	 let i+=1
-	 while [[ "${array[$i]}" == " "* ]] && (( $i < ${#array[@]} )); do echo ${array[$i]} | sed -e "s/[[:space:]]\+/ /g" ; let i+=1; done
+	 while [[ "${array[$i]}" == " "* ]] && (( $i < ${#array[@]} )); do 
+		 echo ${array[$i]} | sed -e "s/[[:space:]]\+/ /g" | sed -e 's/^[ \t]*//'
+		 let i+=1; 
+	 done
 	 echo "Continua a leggere su $(searchURLbykey "site:linux.die.net man $1")"
  }
 
