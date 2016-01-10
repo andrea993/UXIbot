@@ -98,6 +98,19 @@ searchIMGbyKey() {
 	 wget -q -O /tmp/telegramimg.jpg $url
  }
 
+ getManDesc() {
+	 local txt=$(bash -c "LANG="C" man $1 | col -b" 2> /dev/null)
+	 if [ "$txt" == "" ]; then echo "Non c'è il manuale per $1" ; return; fi
+	 echo $1 | tr '[:lower:]' '[:upper:]'
+	 IFS=$'\n'
+	 read -rd '' -a array <<<"$txt"
+	 local i=0
+	 while [ ${array[$i]} != "DESCRIPTION" ] && (( $i < ${#array[@]} )); do let i+=1; done 
+	 let i+=1
+	 while [[ "${array[$i]}" == " "* ]] && (( $i < ${#array[@]} )); do echo ${array[$i]} | sed -e "s/[[:space:]]\+/ /g" ; let i+=1; done
+	 echo "Continua a leggere su $(searchURLbykey "site:linux.die.net man $1")"
+ }
+
 isAnAdmin() {
 	while read e; do
 		[[ "$e" == "$1" ]] && return 0
@@ -162,6 +175,7 @@ Comandi disponibili:
 /ubuntuwiki: Cerca nella wiki di ubuntu in inglese
 /ubuntuwiki-it: Cerca nella wiki di ubuntu in italiano
 /fbsdwiki: Cerca nella wiki di freeBSD
+/man: Mostra la descrizione e il link al manuale
 /imgsrc: Cerca la minatura di un'immagine
 /lsadmin: Mostra gli admin
 
@@ -174,6 +188,9 @@ Comandi per soli amministratori:
 				;;
 				'/lsadmin')
 					send_message "$TARGET" "$(cat /tmp/admins)"
+				;;
+				'/man')
+					send_message "$TARGET" "$(getManDesc $MESSAGEARG)"
 				;;
 			*)
 				#send_message "$TARGET" "$MESSAGE" #ripete i comandi

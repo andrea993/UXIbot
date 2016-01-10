@@ -1,0 +1,12 @@
+
+ getManDesc() {
+	 local txt=$(bash -c "LANG="C" man fstab | col -b" 2> /dev/null)
+	 [ "$txt" == "" ] && echo "Non c'è il manuale per $1" ; return
+	 echo $1 | tr '[:lower:]' '[:upper:]'
+	 IFS=$'\n'
+	 read -rd '' -a array <<<"$txt"
+	 local i=0
+	 while [ ${array[$i]} != "DESCRIPTION" ] && (( $i < ${#array[@]} )); do let i+=1; done 
+	 let i+=1
+	 while [[ "${array[$i]}" == " "* ]] && (( $i < ${#array[@]} )); do echo ${array[$i]} | sed -e "s/[[:space:]]\+/ /g" ; let i+=1; done
+ }
