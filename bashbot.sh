@@ -111,8 +111,9 @@ process_client() {
 	local PHOTO_ID=$3
 	local USERNAME=$4
 	local MESSAGECMD=${MESSAGE%% *}
-	MESSAGECMD=$(echo $MESSAGECMD | cut -f1 -d"@") #per i comandi da click
 	local MESSAGEARG=${MESSAGE#* }
+	[ "$MESSAGECMD" == "$MESSAGE" ] && MESSAGEARG=""
+	MESSAGECMD=$(echo $MESSAGECMD | cut -f1 -d"@") #per i comandi da click
 	local msg=""
 	local copname="$TARGET"
 	local copidname="$copname/pid"
@@ -174,12 +175,14 @@ Comandi per soli amministratori:
 					done
 				;;
 				'/addadmin')
-					if ! isAnAdmin $MESSAGEARG ;then
-						echo $MESSAGEARG >> admins.txt
-						cp -f admins.txt /tmp/admins
-						send_message "$TARGET" "$MESSAGEARG aggiunto tra gli admin"
-					else
-						send_message "$TARGET" "$MESSAGEARG è già un admin"
+					if (( ${#MESSAGEARG} > 4)); then
+						if ! isAnAdmin $MESSAGEARG ;then
+							echo $MESSAGEARG >> admins.txt
+							cp -f admins.txt /tmp/admins
+							send_message "$TARGET" "$MESSAGEARG aggiunto tra gli admin"
+						else
+							send_message "$TARGET" "$MESSAGEARG è già un admin"
+						fi
 					fi
 				;;
 				'/deladmin')
