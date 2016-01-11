@@ -109,7 +109,7 @@ searchIMGbyKey() {
 	 local tabi=$(printf '\t')
 	 while [ ${array[$i]} != "DESCRIPTION" ] && (( $i < ${#array[@]} )); do let i+=1; done 
 	 let i+=1
-	 while [[ "${array[$i]}" == " "* ]] || [[ "${array[$i]}" == $'\t'* ]] && (( $i < ${#array[@]} )); do 
+	 while ( [[ "${array[$i]}" == " "* ]] || [[ "${array[$i]}" == $'\t'* ]] ) && (( $i < ${#array[@]} )); do 
 		 echo ${array[$i]} | sed -e "s/[[:space:]]\+/ /g" | sed -e 's/^[ \t]*//'
 		 let i+=1; 
 	 done
@@ -208,7 +208,7 @@ Comandi per soli amministratori:
 					send_message "$TARGET" "$(getManDesc $MESSAGEARG)"
 				;;
 				'/calc')
-					send_message "$TARGET" "$(echo "$MESSAGEARG" | bc)"
+					send_message "$TARGET" "$(bash -c "echo $MESSAGEARG | bc" 2> /dev/null)"
 				;;
 			*)
 				#send_message "$TARGET" "$MESSAGE" #ripete i comandi
