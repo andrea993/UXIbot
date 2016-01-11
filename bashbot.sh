@@ -106,9 +106,10 @@ searchIMGbyKey() {
 	 IFS=$'\n'
 	 read -rd '' -a array <<<"$txt"
 	 local i=0
+	 local tabi=$(printf '\t')
 	 while [ ${array[$i]} != "DESCRIPTION" ] && (( $i < ${#array[@]} )); do let i+=1; done 
 	 let i+=1
-	 while [[ "${array[$i]}" == " "* ]] && (( $i < ${#array[@]} )); do 
+	 while [[ "${array[$i]}" == " "* ]] || [[ "${array[$i]}" == $'\t'* ]] && (( $i < ${#array[@]} )); do 
 		 echo ${array[$i]} | sed -e "s/[[:space:]]\+/ /g" | sed -e 's/^[ \t]*//'
 		 let i+=1; 
 	 done
