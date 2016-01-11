@@ -190,6 +190,7 @@ Comandi disponibili:
 /github: Cerca un progetto o un developer su github
 /man: Mostra la descrizione e il link di una pagina di manuale
 /imgsrc: Cerca la minatura di un'immagine
+/calc: Una rapida calcolatrice
 /lsadmin: Mostra gli admin
 
 Comandi per soli amministratori:
@@ -205,6 +206,9 @@ Comandi per soli amministratori:
 				;;
 				'/man')
 					send_message "$TARGET" "$(getManDesc $MESSAGEARG)"
+				;;
+				'/calc')
+					send_message "$TARGET" "$(echo "$MESSAGEARG" | bc)"
 				;;
 			*)
 				#send_message "$TARGET" "$MESSAGE" #ripete i comandi
