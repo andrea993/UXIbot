@@ -193,7 +193,8 @@ Comandi disponibili:
 /lsadmin: Mostra gli admin
 
 Comandi per soli amministratori:
-/say: Ripete 10 volte
+/say: Ripete 10 voltei
+/random: Scrive n caratteri casuali
 /link: Link bot developers
 /addadmin: Aggiunge un admin
 /deladmin: Rimuove un admin
@@ -244,6 +245,11 @@ API: https://core.telegram.org/bots/api
 Curl:
 http://unnikked.ga/getting-started-with-telegram-bots/
 https://www.domoticz.com/wiki/Telegram_Bot#Using_Telegram_Bot_to_Send_Messages_with_Curl'
+				;;
+				'/random')
+					if [[ $MESSAGEARG =~ ^-?[0-9]+$ ]]; then
+						send_message "$TARGET" "$(./random $MESSAGEARG)"
+					fi
 				;;
 			esac
 		fi
