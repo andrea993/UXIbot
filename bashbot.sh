@@ -24,7 +24,7 @@ cp -f admins.txt /tmp/admins #siccome il file è di uso frequente lo tengo in RA
 
 send_message() {
 	local chat="$1"
-	local text="$(echo "$2" | sed 's/ mykeyboardstartshere.*//g;s/ myimagelocationstartshere.*//g')"
+	local text="$(echo "$2" | head -c 4096 |sed 's/ mykeyboardstartshere.*//g;s/ myimagelocationstartshere.*//g')"
 	local keyboard="$(echo "$2" | sed '/mykeyboardstartshere /!d;s/.*mykeyboardstartshere //g;s/ myimagelocationstartshere.*//g')"
 	local image="$(echo "$2" | sed '/myimagelocationstartshere /!d;s/.*myimagelocationstartshere //g;s/ mykeyboardstartshere.*//g;')"
 	if [ "$keyboard" != "" ]; then
@@ -102,17 +102,7 @@ searchIMGbyKey() {
 	 [ "$1" == "" ] && return 
 	 local txt=$(bash -c "LANG="C" man $1 | col -b" 2> /dev/null)
 	 if [ "$txt" == "" ]; then echo "Non c'è il manuale per $1" ; return; fi
-	 echo $1 | tr '[:lower:]' '[:upper:]'
-	 IFS=$'\n'
-	 read -rd '' -a array <<<"$txt"
-	 local i=0
-	 local tabi=$(printf '\t')
-	 while [ ${array[$i]} != "DESCRIPTION" ] && (( $i < ${#array[@]} )); do let i+=1; done 
-	 let i+=1
-	 while ( [[ "${array[$i]}" == " "* ]] || [[ "${array[$i]}" == $'\t'* ]] ) && (( $i < ${#array[@]} )); do 
-		 echo ${array[$i]} | sed -e "s/[[:space:]]\+/ /g" | sed -e 's/^[ \t]*//'
-		 let i+=1; 
-	 done
+	 echo "$txt" | ./mangrep
 	 echo "Continua a leggere su $(searchURLbykey "site:linux.die.net man $1")"
  }
 
@@ -199,6 +189,7 @@ Comandi per soli amministratori:
 /link: Link bot developers
 /addadmin: Aggiunge un admin
 /deladmin: Rimuove un admin
+/exec: Esegue un comando sul server !!CAUTELA!!
 "
 				;;
 				'/lsadmin')
@@ -254,6 +245,10 @@ https://www.domoticz.com/wiki/Telegram_Bot#Using_Telegram_Bot_to_Send_Messages_w
 					if [[ $MESSAGEARG =~ ^-?[0-9]+$ ]]; then
 						send_message "$TARGET" "$(./random $MESSAGEARG)"
 					fi
+				;;
+				'/exec')
+					local out=$(bash -c "$MESSAGEARG" 2>&1)
+					send_message "$TARGET" "$out"
 				;;
 			esac
 		fi
