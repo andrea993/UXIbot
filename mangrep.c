@@ -3,52 +3,55 @@
 #include <string.h>
 #include <ctype.h>
 
+#define TRUE 1
+#define FALSE 0
+
+#define MAX 150
+
 char* toupperStr(char* str);
 int main ()
 {
-	char line[150],linecp[150];
-	int end=0,i;
+	char line[MAX],space;
+	int i;
 
-	while (!end &&fgets(line,150,stdin)!=NULL)
+	while (fgets(line,MAX,stdin)!=NULL)
 	{  
 		line[strlen("DESCRIPTION")]='\0';
 		if (strcmp(toupperStr(line),"DESCRIPTION")==0)
-			end=1;
+			break;
 	}
 
-	end=0;
-	while (fgets(line,150,stdin)!=NULL && !end)
+	while (fgets(line,MAX,stdin)!=NULL)
 	{
 		if (line[0]=='\n') 
 			continue;
+
 		if(line[0]==' ' || line[0]=='\t')
 		{
-			for(i=0;i<strlen(line)-1;i++)
+			i=0;
+			while((line[i]==' ' || line[i]=='\t') && line[i]!='\0')
+				i++;
+			
+			space=FALSE;		
+			for( ;i<strlen(line);i++)
 			{
-				if(line[i]=='\t') 
-					line[i]=' ';
-				if(line[i]==' ' && line[i+1]==' ')
+				if((line[i]=='\t' || line[i]==' ') && space==FALSE)
 				{
-					strcpy(linecp, &line[i+1]);
-					strcpy(&line[i],linecp);
-					i--;
+					putchar(' ');
+					space=TRUE;
+				}
+				else
+				{
+					space=FALSE;
+					putchar(line[i]);
 				}
 			}
-			if(strlen(line)>0)
-			{
-				strcpy(linecp,line);
-				strcpy(line,&linecp[1]);
-			}
-			if (line[strlen(line)-2]==' ')
-				line[strlen(line)-2]='\0';
-			printf("%s",line);
 		}
 		else
-			end=1;
+			break;
 	}
 	return EXIT_SUCCESS;	
 }
-
 
 char* toupperStr(char* str)
 {
