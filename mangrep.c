@@ -6,7 +6,7 @@
 #define TRUE 1
 #define FALSE 0
 
-#define MAX 150
+#define MAX 300 
 
 char* toupperStr(char* str);
 int main ()
@@ -20,7 +20,7 @@ int main ()
 		if (strcmp(toupperStr(line),"DESCRIPTION")==0)
 			break;
 	}
-
+	
 	while (fgets(line,MAX,stdin)!=NULL)
 	{
 		if (line[0]=='\n') 
