@@ -25,7 +25,7 @@ Comandi disponibili:
 /lsadmin: Mostra gli admin
 
 Comandi per soli amministratori:
-/say: Ripete 10 voltei
+/say: Ripete 10 volte
 /random: Scrive n caratteri casuali
 /link: Link bot developers
 /addadmin: Aggiunge un admin
@@ -37,6 +37,11 @@ Comandi per soli amministratori:
 ````
 $ make
 # make install
+````
+##Avvio
+E' necessario munirsi di un TOKEN fornito da [BotFather](https://core.telegram.org/bots)
+````
+$ uxibot $TOKEN
 ````
 ##Disinstallazione
 ```
