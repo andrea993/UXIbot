@@ -12,6 +12,8 @@
 # This file is public domain in the USA and all free countries.
 # If you're in Europe, and public domain does not exist, then haha.
 
+cd /opt/uxibot
+
 TOKEN=$1
 URL='https://api.telegram.org/bot'$TOKEN
 MSG_URL=$URL'/sendMessage'
@@ -107,10 +109,8 @@ searchIMGbyKey() {
  }
 
 isAnAdmin() {
-	while read e; do
-		[[ "$e" == "$1" ]] && return 0
-	done </tmp/admins
-	return 1
+	grep -wq "$1" /tmp/admins
+	return $?
 }
 
 process_client() {
