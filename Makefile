@@ -17,5 +17,6 @@ install:
 	ln -sf /opt/uxibot/bashbot.sh /usr/bin/uxibot 
 	
 uninstall:
-	rm -rf /opt/uxibot
+	rm -rf /opt/uxibot || exit 1
+	rm -f /usr/bin/uxibot || exit 1
 

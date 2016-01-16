@@ -12,7 +12,8 @@
 # This file is public domain in the USA and all free countries.
 # If you're in Europe, and public domain does not exist, then haha.
 
-cd /opt/uxibot
+
+[[ "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )" == "/usr/bin" ]] && cd /opt/uxibot
 
 TOKEN=$1
 URL='https://api.telegram.org/bot'$TOKEN
@@ -99,6 +100,14 @@ searchIMGbyKey() {
 	local url=$(wget --user-agent 'Mozilla/5.0' -qO - "www.google.be/search?q=$query\&tbm=isch" | sed 's/</\n</g' | grep '<img' | head -n"$number" | tail -n1 | sed 's/.*src="\([^"]*\)".*/\1/')
 	 wget -q -O /tmp/telegramimg.jpg $url
  }
+ 
+searchYTbykey() {
+	local query=$(echo $1 | tr " " +)
+	local number=1
+	local url=$(wget --user-agent 'Mozilla/5.0' -qO - "www.youtube.com/results?search_query=$query" | tail -n +1000 | awk -F 'href=' '{print $2}' | awk -vRS='"' '{print $1}' | grep 'watch?v' | head -n $number)
+	echo "https://www.youtube.com$url"
+
+ }
 
  getManDesc() {
 	 [ "$1" == "" ] && return 
@@ -157,6 +166,9 @@ process_client() {
 				send_photo	"$TARGET" "/tmp/telegramimg.jpg"
 				rm -f /tmp/telegramimg.jpg
 				;;
+			'/youtube')
+				send_message "$TARGET" "$(searchYTbykey  "site:www.youtube.com $MESSAGEARG")"
+				;;
 			'/question')
 				startproc "$copname" "$TARGET"&
 				;;
@@ -180,11 +192,12 @@ Comandi disponibili:
 /github: Cerca un progetto o un developer su github
 /man: Mostra la descrizione e il link di una pagina di manuale
 /imgsrc: Cerca la minatura di un'immagine
+/youtube: Cerca un video su youtube
 /calc: Una rapida calcolatrice
 /lsadmin: Mostra gli admin
 
 Comandi per soli amministratori:
-/say: Ripete 10 voltei
+/say: Ripete 10 volte
 /random: Scrive n caratteri casuali
 /link: Link bot developers
 /addadmin: Aggiunge un admin
