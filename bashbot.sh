@@ -212,7 +212,8 @@ Comandi per soli amministratori:
 					send_message "$TARGET" "$(getManDesc $MESSAGEARG)"
 				;;
 				'/calc')
-					send_message "$TARGET" "$(bash -c "octave --eval "$MESSAGEARG"" 2>&1)"
+					MESSAGEARG=$(echo "\"$MESSAGEARG\"")
+					send_message "$TARGET" "$(bash -c "octave --eval $MESSAGEARG " 2>&1 | tail -1)"
 				;;
 			*)
 				#send_message "$TARGET" "$MESSAGE" #ripete i comandi
