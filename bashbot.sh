@@ -193,7 +193,7 @@ Comandi disponibili:
 /man: Mostra la descrizione e il link di una pagina di manuale
 /imgsrc: Cerca la minatura di un'immagine
 /youtube: Cerca un video su youtube
-/calc: Una rapida calcolatrice
+/calc: Calcola con octave
 /lsadmin: Mostra gli admin
 
 Comandi per soli amministratori:
@@ -212,7 +212,7 @@ Comandi per soli amministratori:
 					send_message "$TARGET" "$(getManDesc $MESSAGEARG)"
 				;;
 				'/calc')
-					send_message "$TARGET" "$(bash -c "echo $MESSAGEARG | bc" 2> /dev/null)"
+					send_message "$TARGET" "$(bash -c "octave --eval "$MESSAGEARG"" 2>&1)"
 				;;
 			*)
 				#send_message "$TARGET" "$MESSAGE" #ripete i comandi
