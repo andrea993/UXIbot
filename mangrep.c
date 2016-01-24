@@ -10,12 +10,10 @@
 
 char* toupperStr(char* str);
 
-short i;
-
 int main ()
 {
 	char line[MAX],space;
-	
+	short i;
 	while (fgets(line,MAX,stdin)!=NULL)
 	{  
 		line[strlen("DESCRIPTION")]='\0';
@@ -58,7 +56,7 @@ int main ()
 char* toupperStr(char* str)
 {
 	while(*str)
-		putchar(toupper(*str++));
+		*str=toupper(*str++));
 		
 	return str;
 }
