@@ -16,8 +16,7 @@ int main ()
 	short i;
 	while (fgets(line,MAX,stdin)!=NULL)
 	{  
-		line[strlen("DESCRIPTION")]='\0';
-		if (!strncmp(toupperStr(line),"DESCRIPTION",11))
+		if (!strncmp(toupperStr(line),"DESCRIPTION",strlen("DESCRIPTION")))
 			break;
 	}
 	
