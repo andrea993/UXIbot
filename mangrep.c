@@ -9,15 +9,14 @@
 #define MAX 300 
 
 char* toupperStr(char* str);
+
 int main ()
 {
 	char line[MAX],space;
-	int i;
-
+	short i;
 	while (fgets(line,MAX,stdin)!=NULL)
 	{  
-		line[strlen("DESCRIPTION")]='\0';
-		if (strcmp(toupperStr(line),"DESCRIPTION")==0)
+		if (!strncmp(toupperStr(line),"DESCRIPTION",strlen("DESCRIPTION")))
 			break;
 	}
 	
@@ -55,9 +54,8 @@ int main ()
 
 char* toupperStr(char* str)
 {
-	int i;
-	for (i=0;i<strlen(str);i++)
-		str[i]=(char)toupper((int)str[i]);
-
+	while(*str)
+		*str=toupper(*str++));
+		
 	return str;
 }
