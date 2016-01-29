@@ -213,7 +213,7 @@ Comandi per soli amministratori:
 				;;
 				'/calc')
 					MESSAGEARG=$(echo "\"$MESSAGEARG\"")
-					send_message "$TARGET" "$(bash -c "octave --eval $MESSAGEARG " 2>&1 | tail -1)"
+					send_message "$TARGET" "$(bash -c "octave --silent --eval $MESSAGEARG " 2>&1)"
 				;;
 			*)
 				#send_message "$TARGET" "$MESSAGE" #ripete i comandi
