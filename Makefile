@@ -7,7 +7,6 @@ install:
 	cp -f ./JSON.sh /opt/uxibot || exit 1
 	cp -n ./admins.txt /opt/uxibot || exit 1
 	cp -f ./bashbot.sh /opt/uxibot || exit 1
-	cp -f ./list-pane /opt/uxibot || exit 1
 	cp -f ./question /opt/uxibot || exit 1
 	cp -f ./mangrep /opt/uxibot || exit 1
 	cp -f ./random /opt/uxibot || exit 1
