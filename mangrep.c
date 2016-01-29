@@ -55,7 +55,7 @@ int main ()
 char* toupperStr(char* str)
 {
 	while(*str)
-		*str=toupper(*str++));
+		*str=toupper(*str++);
 		
 	return str;
 }
