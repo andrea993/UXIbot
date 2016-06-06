@@ -87,8 +87,9 @@ inproc() {
 }
 
 searchURLbykey() {
-	local url=$(curl -s --get --data-urlencode "q=$1" http://ajax.googleapis.com/ajax/services/search/web?v=1.0 | sed 's/"unescapedUrl":"\([^"]*\).*/\1/;s/.*GwebSearch",//')
-	if [ ${url:0:1} = "{" ];then
+	local query=$(echo $1 | tr " " +)
+	url=$(lynx -dump https://www.google.com/search?q=$query | grep -Po '(?<=d:)[^&]+' | grep https |head -n1)
+	if [ -z "$url" ]; then
 		url="La pagina non è disponibile"
 	fi
 	echo $url
