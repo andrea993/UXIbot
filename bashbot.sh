@@ -213,7 +213,7 @@ Comandi per soli amministratori:
 					send_message "$TARGET" "$(getManDesc $MESSAGEARG)"
 				;;
 				'/calc')
-					MESSAGEARG=$(echo "\"$MESSAGEARG\"")
+					MESSAGEARG=$(echo "\"$MESSAGEARG\"" | grep -vi "system(")
 					send_message "$TARGET" "$(bash -c "octave --silent --eval $MESSAGEARG " 2>&1)"
 				;;
 			*)
