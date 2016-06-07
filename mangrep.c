@@ -54,8 +54,9 @@ int main ()
 
 char* toupperStr(char* str)
 {
-	while(*str)
-		*str=toupper(*str++);
-		
+	int i;
+	for (i=0;i<strlen(str);i++)
+		str[i]=(char)toupper((int)str[i]);
+
 	return str;
 }

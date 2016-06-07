@@ -88,7 +88,7 @@ inproc() {
 
 searchURLbykey() {
 	local query=$(echo $1 | tr " " +)
-	url=$(lynx -dump https://www.google.com/search?q=$query | grep -Po '(?<=d:)[^&]+' | grep https |head -n1)
+	url=$(lynx -dump https://www.google.com/search?q=$query | grep -Po '(?<=d:)[^&]+' | grep http |head -n1)
 	if [ -z "$url" ]; then
 		url="La pagina non è disponibile"
 	fi
