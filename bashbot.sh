@@ -123,6 +123,10 @@ isAnAdmin() {
 	return $?
 }
 
+validateString() {
+	echo "$1" | grep -ve 'system(' -ve 'fopen(' -ve 'fread(' -ve 'fwrite(' -ve '$(' -ve '`'
+}
+
 process_client() {
 	local MESSAGE=$1
 	local TARGET=$2
@@ -177,7 +181,7 @@ process_client() {
 				send_message "$TARGET" "Questo è UXIbot: il bot di Unix Italia"
 				;;
 			'/start' | '/help')
-				send_message "$TARGET" "Cordiali sauti dal bot di Unix Italia
+				send_message "$TARGET" "Cordiali saluti dal bot di Unix Italia
 Vieni a trovarci su Facebook: https://www.facebook.com/groups/unixitaliagroup
 
 Comandi disponibili:
@@ -213,8 +217,8 @@ Comandi per soli amministratori:
 					send_message "$TARGET" "$(getManDesc $MESSAGEARG)"
 				;;
 				'/calc')
-					MESSAGEARG=$(echo "\"$MESSAGEARG\"" | grep -vi "system(")
-					send_message "$TARGET" "$(bash -c "octave --silent --eval $MESSAGEARG " 2>&1)"
+					MESSAGEARG=$(validateString "$MESSAGEARG")
+					send_message "$TARGET" "$(sh -c "octave --silent --eval \"$MESSAGEARG\"" 2>&1)"
 				;;
 			*)
 				#send_message "$TARGET" "$MESSAGE" #ripete i comandi
