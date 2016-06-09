@@ -198,7 +198,6 @@ Comandi disponibili:
 /man: Mostra la descrizione e il link di una pagina di manuale
 /imgsrc: Cerca la minatura di un'immagine
 /youtube: Cerca un video su youtube
-/calc: Calcola con octave
 /lsadmin: Mostra gli admin
 
 Comandi per soli amministratori:
@@ -207,6 +206,7 @@ Comandi per soli amministratori:
 /link: Link bot developers
 /addadmin: Aggiunge un admin
 /deladmin: Rimuove un admin
+/calc: Calcola con octave
 /exec: Esegue un comando sul server !!CAUTELA!!
 "
 				;;
@@ -216,10 +216,6 @@ Comandi per soli amministratori:
 				'/man')
 					send_message "$TARGET" "$(getManDesc $MESSAGEARG)"
 				;;
-#				'/calc')
-#					MESSAGEARG=$(validateString "$MESSAGEARG")
-#					send_message "$TARGET" "$(sh -c "octave --silent --eval \"$MESSAGEARG\"" 2>&1)"
-#				;;
 			*)
 				#send_message "$TARGET" "$MESSAGE" #ripete i comandi
 		esac
@@ -264,6 +260,9 @@ https://www.domoticz.com/wiki/Telegram_Bot#Using_Telegram_Bot_to_Send_Messages_w
 					if [[ $MESSAGEARG =~ ^-?[0-9]+$ ]]; then
 						send_message "$TARGET" "$(./random $MESSAGEARG)"
 					fi
+				;;
+				'/calc')
+					send_message "$TARGET" "$(sh -c "octave --silent --eval \"$MESSAGEARG\"" 2>&1)"
 				;;
 				'/exec')
 					local out=$(bash -c "$MESSAGEARG" 2>&1)
