@@ -124,7 +124,7 @@ isAnAdmin() {
 }
 
 validateString() {
-	echo "$1" | grep -ve 'system(' -ve 'fopen(' -ve 'fread(' -ve 'fwrite(' -ve '$(' -ve '`' -ve 'save' -ve 'ls' -ve 'fprintf'
+	echo "$1" | grep -ve 'system(' -ve 'fopen(' -ve 'fread(' -ve 'fwrite(' -ve '$(' -ve '`' -ve 'save' -ve 'ls' -ve 'fprintf(' -ve 'diary'
 }
 
 process_client() {
