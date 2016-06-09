@@ -216,10 +216,10 @@ Comandi per soli amministratori:
 				'/man')
 					send_message "$TARGET" "$(getManDesc $MESSAGEARG)"
 				;;
-				'/calc')
-					MESSAGEARG=$(validateString "$MESSAGEARG")
-					send_message "$TARGET" "$(sh -c "octave --silent --eval \"$MESSAGEARG\"" 2>&1)"
-				;;
+#				'/calc')
+#					MESSAGEARG=$(validateString "$MESSAGEARG")
+#					send_message "$TARGET" "$(sh -c "octave --silent --eval \"$MESSAGEARG\"" 2>&1)"
+#				;;
 			*)
 				#send_message "$TARGET" "$MESSAGE" #ripete i comandi
 		esac
