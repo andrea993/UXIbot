@@ -1,46 +1,208 @@
 #!/bin/bash
+
 # bashbot, the Telegram bot written in bash.
-# Written by @topkecleon, Juan Potato (@awkward_potato), Lorenzo Santina (BigNerd95) and Daniil Gentili (danog)
+# Written by Drew (@topkecleon) and Daniil Gentili (@danogentili).
+# Also contributed: JuanPotato, BigNerd95, TiagoDanin, iicc1.
 # https://github.com/topkecleon/telegram-bot-bash
 
-# Depends on ./JSON.sh (http://github.com/dominictarr/./JSON.sh),
-# which is MIT/Apache-licensed
-# And on tmux (https://github.com/tmux/tmux),
-# which is BSD-licensed
-
-
+# Depends on JSON.sh (http://github.com/dominictarr/JSON.sh) (MIT/Apache),
+# and on tmux (http://github.com/tmux/tmux) (BSD).
 # This file is public domain in the USA and all free countries.
-# If you're in Europe, and public domain does not exist, then haha.
-
+# Elsewhere, consider it to be WTFPLv2. (wtfpl.net/txt/copying)
 
 [[ "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )" == "/usr/bin" ]] && cd /opt/uxibot
 
-TOKEN=$1
+if [ ! -f "JSON.sh/JSON.sh" ]; then
+	echo "You did not clone recursively! Downloading JSON.sh..."
+	git clone http://github.com/dominictarr/JSON.sh
+	echo "JSON.sh has been downloaded. Proceeding."
+fi
+
+if [ ! -f "token" ]; then
+	clear
+	echo -e '\e[0;31mTOKEN MISSING.\e[0m'
+	echo "PLEASE WRITE YOUR TOKEN HERE"
+	read token
+	echo "$token" >> token
+fi
+
+source commands.sh source
 URL='https://api.telegram.org/bot'$TOKEN
+
+
+SCRIPT="$0"
 MSG_URL=$URL'/sendMessage'
+LEAVE_URL=$URL'/leaveChat'
+KICK_URL=$URL'/kickChatMember'
+UNBAN_URL=$URL'/unbanChatMember'
 PHO_URL=$URL'/sendPhoto'
+AUDIO_URL=$URL'/sendAudio'
+DOCUMENT_URL=$URL'/sendDocument'
+STICKER_URL=$URL'/sendSticker'
+VIDEO_URL=$URL'/sendVideo'
+VOICE_URL=$URL'/sendVoice'
+LOCATION_URL=$URL'/sendLocation'
+VENUE_URL=$URL'/sendVenue'
+ACTION_URL=$URL'/sendChatAction'
+FORWARD_URL=$URL'/forwardMessage'
+INLINE_QUERY=$URL'/answerInlineQuery'
+ME_URL=$URL'/getMe'
+ME=$(curl -s $ME_URL | ./JSON.sh/JSON.sh -s | egrep '\["result","username"\]' | cut -f 2 | cut -d '"' -f 2)
+
+
 FILE_URL='https://api.telegram.org/file/bot'$TOKEN'/'
 UPD_URL=$URL'/getUpdates?offset='
+GET_URL=$URL'/getFile'
 OFFSET=0
-cp -f admins.txt /tmp/admins #siccome il file è di uso frequente lo tengo in RAM
-#trap "rm -f /tmp/admins" 0 1 2 5 15
+declare -A USER MESSAGE URLS CONTACT LOCATION CHAT
+
+urlencode() {
+	echo "$*" | sed 's:%:%25:g;s: :%20:g;s:<:%3C:g;s:>:%3E:g;s:#:%23:g;s:{:%7B:g;s:}:%7D:g;s:|:%7C:g;s:\\:%5C:g;s:\^:%5E:g;s:~:%7E:g;s:\[:%5B:g;s:\]:%5D:g;s:`:%60:g;s:;:%3B:g;s:/:%2F:g;s:?:%3F:g;s^:^%3A^g;s:@:%40:g;s:=:%3D:g;s:&:%26:g;s:\$:%24:g;s:\!:%21:g;s:\*:%2A:g'
+}
+
 
 send_message() {
+	[ "$2" = "" ] && return 1
 	local chat="$1"
-	local text="$(echo "$2" | head -c 4096 |sed 's/ mykeyboardstartshere.*//g;s/ myimagelocationstartshere.*//g')"
-	local keyboard="$(echo "$2" | sed '/mykeyboardstartshere /!d;s/.*mykeyboardstartshere //g;s/ myimagelocationstartshere.*//g')"
-	local image="$(echo "$2" | sed '/myimagelocationstartshere /!d;s/.*myimagelocationstartshere //g;s/ mykeyboardstartshere.*//g;')"
+	local text="$(echo "$2" | sed 's/ mykeyboardstartshere.*//g;s/ myfilelocationstartshere.*//g;s/ mylatstartshere.*//g;s/ mylongstartshere.*//g;s/ mytitlestartshere.*//g;s/ myaddressstartshere.*//g')"
+	local arg="$3"
+	[ "$3" != "safe" ] && {
+		local keyboard="$(echo "$2" | sed '/mykeyboardstartshere /!d;s/.*mykeyboardstartshere //g;s/ myfilelocationstartshere.*//g;s/ mylatstartshere.*//g;s/ mylongstartshere.*//g;s/ mytitlestartshere.*//g;s/ myaddressstartshere.*//g')"
+
+		local file="$(echo "$2" | sed '/myfilelocationstartshere /!d;s/.*myfilelocationstartshere //g;s/ mykeyboardstartshere.*//g;s/ mylatstartshere.*//g;s/ mylongstartshere.*//g;s/ mytitlestartshere.*//g;s/ myaddressstartshere.*//g')"
+
+		local lat="$(echo "$2" | sed '/mylatstartshere /!d;s/.*mylatstartshere //g;s/ mykeyboardstartshere.*//g;s/ myfilelocationstartshere.*//g;s/ mylongstartshere.*//g;s/ mytitlestartshere.*//g;s/ myaddressstartshere.*//g')"
+
+		local long="$(echo "$2" | sed '/mylongstartshere /!d;s/.*mylongstartshere //g;s/ mykeyboardstartshere.*//g;s/ myfilelocationstartshere.*//g;s/ mylatstartshere.*//g;s/ mytitlestartshere.*//g;s/ myaddressstartshere.*//g')"
+
+		local title="$(echo "$2" | sed '/mytitlestartshere /!d;s/.*mylongstartshere //g;s/ mykeyboardstartshere.*//g;s/ myfilelocationstartshere.*//g;s/ mylatstartshere.*//g;s/ myaddressstartshere.*//g')"
+
+		local address="$(echo "$2" | sed '/myaddressstartshere /!d;s/.*mylongstartshere //g;s/ mykeyboardstartshere.*//g;s/ myfilelocationstartshere.*//g;s/ mylatstartshere.*//g;s/ mytitlestartshere.*//g')"
+
+	}
 	if [ "$keyboard" != "" ]; then
 		send_keyboard "$chat" "$text" "$keyboard"
 		local sent=y
 	fi
-	if [ "$image" != "" ]; then
-		send_photo "$chat" "$image"
+	if [ "$file" != "" ]; then
+		send_file "$chat" "$file" "$text"
+		local sent=y
+	fi
+	if [ "$lat" != "" -a "$long" != "" -a "$address" = "" -a "$title" = "" ]; then
+		send_location "$chat" "$lat" "$long"
+		local sent=y
+	fi
+	if [ "$lat" != "" -a "$long" != "" -a "$address" != "" -a "$title" != "" ]; then
+		send_venue "$chat" "$lat" "$long" "$title" "$address"
 		local sent=y
 	fi
 	if [ "$sent" != "y" ];then
-		res=$(curl -s "$MSG_URL" -F "chat_id=$chat" -F "text=$text")
+		send_text "$chat" "$text"
 	fi
+
+}
+
+send_text() {
+	case "$2" in
+		html_parse_mode*)
+			send_html_message "$1" "${2//html_parse_mode}"
+			;;
+		markdown_parse_mode*)
+			send_markdown_message "$1" "${2//markdown_parse_mode}"
+			;;
+		*)
+			res=$(curl -s "$MSG_URL" -d "chat_id=$1" -d "text=$(urlencode "$2")")
+			;;
+	esac
+}
+
+send_markdown_message() {
+	res=$(curl -s "$MSG_URL" -d "chat_id=$1" -d "text=$(urlencode "$2")" -d "parse_mode=markdown" -d "disable_web_page_preview=true")
+}
+
+send_html_message() {
+	res=$(curl -s "$MSG_URL" -F "chat_id=$1" -F "text=$(urlencode "$2")" -F "parse_mode=html")
+}
+
+kick_chat_member() {
+	res=$(curl -s "$KICK_URL" -F "chat_id=$1" -F "user_id=$2")
+}
+
+unban_chat_member() {
+	res=$(curl -s "$UNBAN_URL" -F "chat_id=$1" -F "user_id=$2")
+}
+
+leave_chat() {
+	res=$(curl -s "$LEAVE_URL" -F "chat_id=$1")
+}
+
+answer_inline_query() {
+	case $2 in
+		"article")
+			InlineQueryResult='[{"type":"'$2'","id":"'$RANDOM'","title":"'$3'","message_text":"'$4'"}]'
+		;;
+		"photo")
+			InlineQueryResult='[{"type":"'$2'","id":"'$RANDOM'","photo_url":"'$3'","thumb_url":"'$4'"}]'
+		;;
+		"gif")
+			InlineQueryResult='[{"type":"'$2'","id":"'$RANDOM'","gif_url":"'$3'", "thumb_url":"'$4'"}]'
+		;;
+		"mpeg4_gif")
+			InlineQueryResult='[{"type":"'$2'","id":"'$RANDOM'","mpeg4_url":"'$3'"}]'
+		;;
+		"video")
+			InlineQueryResult='[{"type":"'$2'","id":"'$RANDOM'","video_url":"'$3'","mime_type":"'$4'","thumb_url":"'$5'","title":"'$6'"}]'
+		;;
+		"audio")
+			InlineQueryResult='[{"type":"'$2'","id":"'$RANDOM'","audio_url":"'$3'","title":"'$4'"}]'
+		;;
+		"voice")
+			InlineQueryResult='[{"type":"'$2'","id":"'$RANDOM'","voice_url":"'$3'","title":"'$4'"}]'
+		;;
+		"document")
+			InlineQueryResult='[{"type":"'$2'","id":"'$RANDOM'","title":"'$3'","caption":"'$4'","document_url":"'$5'","mime_type":"'$6'"}]'
+		;;
+		"location")
+			InlineQueryResult='[{"type":"'$2'","id":"'$RANDOM'","latitude":"'$3'","longitude":"'$4'","title":"'$5'"}]'
+		;;
+		"venue")
+			InlineQueryResult='[{"type":"'$2'","id":"'$RANDOM'","latitude":"'$3'","longitude":"'$4'","title":"'$5'","address":"'$6'"}]'
+		;;
+		"contact")
+			InlineQueryResult='[{"type":"'$2'","id":"'$RANDOM'","phone_number":"'$3'","first_name":"'$4'"}]'
+		;;
+
+		# Cached media stored in Telegram server
+
+		"cached_photo")
+			InlineQueryResult='[{"type":"photo","id":"'$RANDOM'","photo_file_id":"'$3'"}]'
+		;;
+		"cached_gif")
+			InlineQueryResult='[{"type":"gif","id":"'$RANDOM'","gif_file_id":"'$3'"}]'
+		;;
+		"cached_mpeg4_gif")
+			InlineQueryResult='[{"type":"mpeg4_gif","id":"'$RANDOM'","mpeg4_file_id":"'$3'"}]'
+		;;
+		"cached_sticker")
+			InlineQueryResult='[{"type":"sticker","id":"'$RANDOM'","sticker_file_id":"'$3'"}]'
+		;;
+		"cached_document")
+			InlineQueryResult='[{"type":"document","id":"'$RANDOM'","title":"'$3'","document_file_id":"'$4'"}]'
+		;;
+		"cached_video")
+			InlineQueryResult='[{"type":"video","id":"'$RANDOM'","video_file_id":"'$3'","title":"'$4'"}]'
+		;;
+		"cached_voice")
+			InlineQueryResult='[{"type":"voice","id":"'$RANDOM'","voice_file_id":"'$3'","title":"'$4'"}]'
+		;;
+		"cached_audio")
+			InlineQueryResult='[{"type":"audio","id":"'$RANDOM'","audio_file_id":"'$3'"}]'
+		;;
+
+	esac
+
+	res=$(curl -s "$INLINE_QUERY" -F "inline_query_id=$1" -F "results=$InlineQueryResult")
+
 }
 
 send_keyboard() {
@@ -48,257 +210,222 @@ send_keyboard() {
 	local text="$2"
 	shift 2
 	local keyboard=init
-	for f in $*;do local keyboard="$keyboard, [\"$f\"]";done
+	OLDIFS=$IFS
+	IFS=$(echo -en "\"")
+	for f in $*;do [ "$f" != " " ] && local keyboard="$keyboard, [\"$f\"]";done
+	IFS=$OLDIFS
 	local keyboard=${keyboard/init, /}
 	res=$(curl -s "$MSG_URL" --header "content-type: multipart/form-data" -F "chat_id=$chat" -F "text=$text" -F "reply_markup={\"keyboard\": [$keyboard],\"one_time_keyboard\": true}")
 }
 
-send_photo() {
-	res=$(curl -s "$PHO_URL" -F "chat_id=$1" -F "photo=@$2")
+get_file() {
+	[ "$1" != "" ] && echo $FILE_URL$(curl -s "$GET_URL" -F "file_id=$1" | ./JSON.sh/JSON.sh -s | egrep '\["result","file_path"\]' | cut -f 2 | cut -d '"' -f 2)
+}
+
+send_file() {
+	[ "$2" = "" ] && return
+	local chat_id=$1
+	local file=$2
+	echo "$file" | grep -qE $FILE_REGEX || return
+	local ext="${file##*.}"
+	case $ext in
+        	mp3|flac)
+			CUR_URL=$AUDIO_URL
+			WHAT=audio
+			STATUS=upload_audio
+			local CAPTION="$3"
+			;;
+		png|jpg|jpeg|gif)
+			CUR_URL=$PHO_URL
+			WHAT=photo
+			STATUS=upload_photo
+			local CAPTION="$3"
+			;;
+		webp)
+			CUR_URL=$STICKER_URL
+			WHAT=sticker
+			STATUS=
+			;;
+		mp4)
+			CUR_URL=$VIDEO_URL
+			WHAT=video
+			STATUS=upload_video
+			local CAPTION="$3"
+			;;
+
+		ogg)
+			CUR_URL=$VOICE_URL
+			WHAT=voice
+			STATUS=
+			;;
+		*)
+			CUR_URL=$DOCUMENT_URL
+			WHAT=document
+			STATUS=upload_document
+			local CAPTION="$3"
+			;;
+	esac
+	send_action $chat_id $STATUS
+	res=$(curl -s "$CUR_URL" -F "chat_id=$chat_id" -F "$WHAT=@$file" -F "caption=$CAPTION")
+}
+
+# typing for text messages, upload_photo for photos, record_video or upload_video for videos, record_audio or upload_audio for audio files, upload_document for general files, find_location for location
+
+send_action() {
+	[ "$2" = "" ] && return
+	res=$(curl -s "$ACTION_URL" -F "chat_id=$1" -F "action=$2")
+}
+
+send_location() {
+	[ "$3" = "" ] && return
+	res=$(curl -s "$LOCATION_URL" -F "chat_id=$1" -F "latitude=$2" -F "longitude=$3")
+}
+
+send_venue() {
+	[ "$5" = "" ] && return
+	[ "$6" != "" ] add="-F \"foursquare_id=$6\""
+	res=$(curl -s "$VENUE_URL" -F "chat_id=$1" -F "latitude=$2" -F "longitude=$3" -F "title=$4" -F "address=$5" $add)
+}
+
+
+forward() {
+	[ "$3" = "" ] && return
+	res=$(curl -s "$FORWARD_URL" -F "chat_id=$1" -F "from_chat_id=$2" -F "message_id=$3")
 }
 
 startproc() {
-	local copname=$1
-	copname=${copname//-/}
-	local TARGET="$2"
-	echo $copname $TARGET 
-	mkdir -p "$copname"
-	mkfifo $copname/out
-	#tmux new-session -d -n $copname "./question 2>&1>$copname/out"
-	#local pid=$(ps aux | sed '/tmux/!d;/'$copname'/!d;/sed/d;s/'$USER'\s*//g;s/\s.*//g')
-	tmux new-session -d "./question 2>&1>$copname/out"
-	local pid=$(ps aux | grep "/question 2>&1>$copname/out" | grep -v grep | awk '{ print $2 }')
-	echo $pid>$copname/pid
-	while ps aux | grep -v grep | grep -q $pid;do
-		read -t 10 line
-		[ "$line" != "" ] && send_message "$TARGET" "$line"
-		line=
-	done <$copname/out
+	killproc
+	mkfifo /tmp/$copname
+	TMUX= tmux new-session -d -s $copname "$* &>/tmp/$copname; echo imprettydarnsuredatdisisdaendofdacmd>/tmp/$copname"
+	TMUX= tmux new-session -d -s sendprocess_$copname "bash $SCRIPT outproc ${CHAT[ID]} $copname"
 }
+
+killproc() {
+	(tmux kill-session -t $copname; echo imprettydarnsuredatdisisdaendofdacmd>/tmp/$copname; tmux kill-session -t sendprocess_$copname; rm -r /tmp/$copname)2>/dev/null
+}
+
 inproc() {
-	local copname="$1"
-	local copid="$2"
-	local MESSAGE="$3"
-	local PHOTO_ID="$4"
-	shift 2
-	tmux send-keys -t $copname "$MESSAGE
+	tmux send-keys -t $copname "$MESSAGE ${URLS[*]}
 "
-	ps aux | grep -v grep | grep -q "$copid" || { rm -r $copname; };
-}
-
-searchURLbykey() {
-	local query=$(echo $1 | tr " " +)
-	url=$(lynx -dump https://www.google.com/search?q=$query | grep -Po '(?<=d:)[^&]+' | grep http |head -n1)
-	if [ -z "$url" ]; then
-		url="La pagina non è disponibile"
-	fi
-	echo $url
-}
-
-searchIMGbyKey() {
-	local query=$(echo $1 | tr " " +)
-	local number=1
-	local url=$(wget --user-agent 'Mozilla/5.0' -qO - "www.google.be/search?q=$query\&tbm=isch" | sed 's/</\n</g' | grep '<img' | head -n"$number" | tail -n1 | sed 's/.*src="\([^"]*\)".*/\1/')
-	 wget -q -O /tmp/telegramimg.jpg $url
- }
- 
-searchYTbykey() {
-	local query=$(echo $1 | tr " " +)
-	local number=1
-	local url=$(wget --user-agent 'Mozilla/5.0' -qO - "www.youtube.com/results?search_query=$query" | tail -n +1000 | awk -F 'href=' '{print $2}' | awk -vRS='"' '{print $1}' | grep 'watch?v' | head -n $number)
-	echo "https://www.youtube.com$url"
-
- }
-
- getManDesc() {
-	 [ "$1" == "" ] && return 
-	 local txt=$(bash -c "LANG="C" man $1 | col -b" 2> /dev/null)
-	 if [ "$txt" == "" ]; then echo "Non c'è il manuale per $1" ; return; fi
-	 echo "$txt" | ./mangrep
-	 echo "Continua a leggere su $(searchURLbykey "site:linux.die.net man $1")"
- }
-
-isAnAdmin() {
-	grep -wq "$1" /tmp/admins
-	return $?
-}
-
-validateString() {
-	echo "$1" | grep -ve 'system(' -ve 'fopen(' -ve 'fread(' -ve 'fwrite(' -ve '$(' -ve '`' -ve 'save' -ve 'ls' -ve 'fprintf(' -ve 'diary'
 }
 
 process_client() {
-	local MESSAGE=$1
-	local TARGET=$2
-	local PHOTO_ID=$3
-	local USERNAME=$4
-	local MESSAGECMD=${MESSAGE%% *}
-	local MESSAGEARG=${MESSAGE#* }
-	[ "$MESSAGECMD" == "$MESSAGE" ] && MESSAGEARG=""
-	MESSAGECMD=$(echo $MESSAGECMD | cut -f1 -d"@") #per i comandi da click
-	local msg=""
-	local copname="$TARGET"
-	local copidname="$copname/pid"
-	local copid="$(cat $copidname 2>/dev/null)"
-	if [ "$copid" = "" ]; then
-		case $MESSAGECMD in
-			'/wikipedia')
-				send_message "$TARGET" "$(searchURLbykey "site:it.wikipedia.org $MESSAGEARG")"	
-				;;
-			'/archwiki')
-				send_message "$TARGET" "$(searchURLbykey "site:wiki.archlinux.org $MESSAGEARG")"
-				;;
-			'/debianwiki')
-				send_message "$TARGET" "$(searchURLbykey	"site:wiki.debian.org $MESSAGEARG")"
-				;;
-			'/gentoowiki')
-				send_message "$TARGET" "$(searchURLbykey "site:wiki.gentoo.org $MESSAGEARG")"
-				;;
-			'/ubuntuwiki')
-				send_message "$TARGET" "$(searchURLbykey	"site:wiki.ubuntu.com $MESSAGEARG")"
-				;;
-			'/ubuntuwiki-it')
-				send_message "$TARGET" "$(searchURLbykey	"site:wiki.ubuntu-it.org $MESSAGEARG")"
-				;;
-			'/fbsdwiki')
-				send_message "$TARGET" "$(searchURLbykey	"site:wiki.freebsd.org $MESSAGEARG")"
-				;;
-			'/github')
-				send_message "$TARGET" "$(searchURLbykey	"site:github.com $MESSAGEARG")"
-				;;
-			'/imgsrc')
-				searchIMGbyKey "$MESSAGEARG"
-				send_photo	"$TARGET" "/tmp/telegramimg.jpg"
-				rm -f /tmp/telegramimg.jpg
-				;;
-			'/youtube')
-				send_message "$TARGET" "$(searchYTbykey  "site:www.youtube.com $MESSAGEARG")"
-				;;
-			'/question')
-				startproc "$copname" "$TARGET"&
-				;;
-			'/info')
-				send_message "$TARGET" "Questo è UXIbot: il bot di Unix Italia"
-				;;
-			'/start' | '/help')
-				send_message "$TARGET" "Cordiali saluti dal bot di Unix Italia
-Vieni a trovarci su Facebook: https://www.facebook.com/groups/unixitaliagroup
+	# Message
+	MESSAGE=$(echo "$res" | egrep '\["result",0,"message","text"\]' | cut -f 2 | cut -d '"' -f 2)
+	MESSAGE_ID=$(echo "$res" | egrep '\["result",0,"message","message_id"\]' | cut -f 2 | cut -d '"' -f 2)
+	# Chat
+	CHAT[ID]=$(echo "$res" | egrep '\["result",0,"message","chat","id"\]' | cut -f 2)
+	CHAT[FIRST_NAME]=$(echo "$res" | egrep '\["result",0,"message","chat","first_name"\]' | cut -f 2 | cut -d '"' -f 2)
+	CHAT[LAST_NAME]=$(echo "$res" | egrep '\["result",0,"message","chat","last_name"\]' | cut -f 2 | cut -d '"' -f 2)
+	CHAT[USERNAME]=$(echo "$res" | egrep '\["result",0,"message","chat","username"\]' | cut -f 2 | cut -d '"' -f 2)
+	CHAT[TITLE]=$(echo "$res" | egrep '\["result",0,"message","chat","title"\]' | cut -f 2 | cut -d '"' -f 2)
 
-Comandi disponibili:
-/start: Avvia il bot e mostra questo messaggio
-/info: A proposito
-/wikipedia: Cerca su wikipedia
-/archwiki: Cerca nella wiki di arch
-/debianwiki: Cerca nella wiki di debian
-/gentoowiki: Cerca nella wiki di gentoo
-/ubuntuwiki: Cerca nella wiki di ubuntu in inglese
-/ubuntuwiki-it: Cerca nella wiki di ubuntu in italiano
-/fbsdwiki: Cerca nella wiki di freeBSD
-/github: Cerca un progetto o un developer su github
-/man: Mostra la descrizione e il link di una pagina di manuale
-/imgsrc: Cerca la minatura di un'immagine
-/youtube: Cerca un video su youtube
-/lsadmin: Mostra gli admin
+	# User
+	USER[ID]=$(echo "$res" | egrep '\["result",0,"message","from","id"\]' | cut -f 2)
+	USER[FIRST_NAME]=$(echo "$res" | egrep '\["result",0,"message","from","first_name"\]' | cut -f 2 | cut -d '"' -f 2)
+	USER[LAST_NAME]=$(echo "$res" | egrep '\["result",0,"message","from","last_name"\]' | cut -f 2 | cut -d '"' -f 2)
+	USER[USERNAME]=$(echo "$res" | egrep '\["result",0,"message","from","username"\]' | cut -f 2 | cut -d '"' -f 2)
 
-Comandi per soli amministratori:
-/say: Ripete 10 volte
-/random: Scrive n caratteri casuali
-/link: Link bot developers
-/addadmin: Aggiunge un admin
-/deladmin: Rimuove un admin
-/calc: Calcola con octave
-/exec: Esegue un comando sul server !!CAUTELA!!
-"
-				;;
-				'/lsadmin')
-					send_message "$TARGET" "$(cat /tmp/admins)"
-				;;
-				'/man')
-					send_message "$TARGET" "$(getManDesc $MESSAGEARG)"
-				;;
-			*)
-				#send_message "$TARGET" "$MESSAGE" #ripete i comandi
-		esac
-		#ADMIN commands
-		if isAnAdmin $USERNAME ;then	
-			case $MESSAGECMD in
-				'/say')
-					for i in {1..10} ;do
-						send_message "$TARGET" "$MESSAGEARG"
-					done
-				;;
-				'/addadmin')
-					if (( ${#MESSAGEARG} > 4)); then
-						if ! isAnAdmin $MESSAGEARG ;then
-							echo $MESSAGEARG >> admins.txt
-							cp -f admins.txt /tmp/admins
-							send_message "$TARGET" "$MESSAGEARG aggiunto tra gli admin"
-						else
-							send_message "$TARGET" "$MESSAGEARG è già un admin"
-						fi
-					fi
-				;;
-				'/deladmin')
-					if isAnAdmin $MESSAGEARG ;then
-						sed "/$MESSAGEARG/d" /tmp/admins > ./admins.txt
-				      cp -f admins.txt /tmp/admins	
-					   send_message "$TARGET" "$MESSAGEARG rimosso dagli gli admin"
-					else
-						send_message "$TARGET" "$MESSAGEARG non è stato trovato tra gli admin"
-					fi
-				;;
-				'/link') 
-					send_message "$TARGET" '
-Github: https://github.com/andrea993/UXIbot
-BotFather: https://core.telegram.org/bots 
-API: https://core.telegram.org/bots/api
-Curl:
-http://unnikked.ga/getting-started-with-telegram-bots/
-https://www.domoticz.com/wiki/Telegram_Bot#Using_Telegram_Bot_to_Send_Messages_with_Curl'
-				;;
-				'/random')
-					if [[ $MESSAGEARG =~ ^-?[0-9]+$ ]]; then
-						send_message "$TARGET" "$(./random $MESSAGEARG)"
-					fi
-				;;
-				'/calc')
-					send_message "$TARGET" "$(sh -c "octave --silent --eval \"$MESSAGEARG\"" 2>&1)"
-				;;
-				'/exec')
-					local out=$(bash -c "$MESSAGEARG" 2>&1)
-					send_message "$TARGET" "$out"
-				;;
-			esac
-		fi
-	else
-		case $MESSAGE in
-			'/cancel')
-				kill $copid
-				rm -r $copname
-				send_message "$TARGET" "Command canceled."
-				;;
-			*) inproc "$copname" "$copid" "$MESSAGE" "$PHOTO_ID";;
-		esac
-	fi
+	# Audio
+	URLS[AUDIO]=$(get_file $(echo "$res" | egrep '\["result",0,"message","audio","file_id"\]' | cut -f 2 | cut -d '"' -f 2))
+	# Document
+	URLS[DOCUMENT]=$(get_file $(echo "$res" | egrep '\["result",0,"message","document","file_id"\]' | cut -f 2 | cut -d '"' -f 2))
+	# Photo
+	URLS[PHOTO]=$(get_file $(echo "$res" | egrep '\["result",0,"message","photo",.*,"file_id"\]' | cut -f 2 | cut -d '"' -f 2 | sed -n '$p'))
+	# Sticker
+	URLS[STICKER]=$(get_file $(echo "$res" | egrep '\["result",0,"message","sticker","file_id"\]' | cut -f 2 | cut -d '"' -f 2))
+	# Video
+	URLS[VIDEO]=$(get_file $(echo "$res" | egrep '\["result",0,"message","video","file_id"\]' | cut -f 2 | cut -d '"' -f 2))
+	# Voice
+	URLS[VOICE]=$(get_file $(echo "$res" | egrep '\["result",0,"message","voice","file_id"\]' | cut -f 2 | cut -d '"' -f 2))
+
+	# Contact
+	CONTACT[NUMBER]=$(echo "$res" | egrep '\["result",0,"message","contact","phone_number"\]' | cut -f 2 | cut -d '"' -f 2)
+	CONTACT[FIRST_NAME]=$(echo "$res" | egrep '\["result",0,"message","contact","first_name"\]' | cut -f 2 | cut -d '"' -f 2)
+	CONTACT[LAST_NAME]=$(echo "$res" | egrep '\["result",0,"message","contact","last_name"\]' | cut -f 2 | cut -d '"' -f 2)
+	CONTACT[USER_ID]=$(echo "$res" | egrep '\["result",0,"message","contact","user_id"\]' | cut -f 2 | cut -d '"' -f 2)
+
+	# Caption
+	CAPTION=$(echo "$res" | egrep '\["result",0,"message","caption"\]' | cut -f 2 | cut -d '"' -f 2)
+
+	# Location
+	LOCATION[LONGITUDE]=$(echo "$res" | egrep '\["result",0,"message","location","longitude"\]' | cut -f 2 | cut -d '"' -f 2)
+	LOCATION[LATITUDE]=$(echo "$res" | egrep '\["result",0,"message","location","latitude"\]' | cut -f 2 | cut -d '"' -f 2)
+	NAME="$(echo ${URLS[*]} | sed 's/.*\///g')"
+
+	# Tmux
+	copname="$ME"_"${CHAT[ID]}"
+
+	source commands.sh
+
+	tmpcount="COUNT${CHAT[ID]}"
+	cat count | grep -q "$tmpcount" || echo "$tmpcount">>count
+	# To get user count execute bash bashbot.sh count
 }
 
-while true; do {
+# source the script with source as param to use functions in other scripts
+while [ "$1" == "startbot" ]; do {
 
+	res=$(curl -s $UPD_URL$OFFSET | ./JSON.sh/JSON.sh -s)
 
-res=$(curl -s $UPD_URL$OFFSET)
-
-	TARGET=$(echo $res | ./JSON.sh | egrep '\["result",0,"message","chat","id"\]' | cut -f 2)
-	OFFSET=$(echo $res | ./JSON.sh | egrep '\["result",0,"update_id"\]' | cut -f 2)
-	MESSAGE=$(echo $res | ./JSON.sh -s | egrep '\["result",0,"message","text"\]' | cut -f 2 | cut -d '"' -f 2)
-	PHOTO_ID=$(echo $res | ./JSON.sh -s | egrep '\["result",0,"message","photo",.*,"file_id"\]' | cut -f 2 | cut -d '"' -f 2 | sed -n '$p')
-
-	USERNAME=$(echo $res | ./JSON.sh -s | egrep '\["result",0,"message","from","username"\]' | cut -f 2 | cut -d '"' -f 2)
-
+	# Offset
+	OFFSET=$(echo "$res" | egrep '\["result",0,"update_id"\]' | cut -f 2)
 	OFFSET=$((OFFSET+1))
 
 	if [ $OFFSET != 1 ]; then
-		process_client "$MESSAGE" "$TARGET" "$PHOTO_ID" "$USERNAME"&
+		if [ "$2" == "test" ]; then
+			process_client
+		else
+			process_client&
+		fi
 	fi
 
 }; done
+
+
+case "$1" in
+	"outproc")
+		until [ "$line" = "imprettydarnsuredatdisisdaendofdacmd" ];do
+			line=
+			read -t 10 line
+			[ "$line" != "" -a "$line" != "imprettydarnsuredatdisisdaendofdacmd" ] && send_message "$2" "$line"
+		done </tmp/$3
+		rm -r /tmp/$3
+		;;
+	"count")
+		echo "A total of $(wc -l count | sed 's/count//g')users used me."
+		;;
+	"broadcast")
+		echo "Sending the broadcast $* to $(wc -l count | sed 's/count//g')users."
+		[ $(wc -l count | sed 's/ count//g') -gt 300 ] && sleep="sleep 0.5"
+		shift
+		for f in $(cat count);do send_message ${f//COUNT} "$*"; $sleep;done
+		;;
+	"start")
+		clear
+		tmux kill-session -t $ME&>/dev/null
+		tmux new-session -d -s $ME "bash $SCRIPT startbot" && echo -e '\e[0;32mBot started successfully.\e[0m'
+		echo "Tmux session name $ME" || echo -e '\e[0;31mAn error occurred while starting the bot. \e[0m'
+		send_markdown_message "${CHAT[ID]}" "*Bot started*"
+		cp -f admins.txt /tmp/admins #siccome il file è di uso frequente lo tengo in RAM
+		;;
+	"kill")
+		clear
+		tmux kill-session -t $ME &>/dev/null
+		send_markdown_message "${CHAT[ID]}" "*Bot stopped*"
+		echo -e '\e[0;32mOK. Bot stopped successfully.\e[0m'
+		rm -f /tmp/admins
+		;;
+	"help")
+		clear
+		less README.md
+		;;
+	"attach")
+		tmux attach -t $ME
+		;;
+	*)
+		echo -e '\e[0;31mBAD REQUEST\e[0m'
+		echo -e '\e[0;31mAvailable arguments: outproc, count, broadcast, start, kill, help, attach\e[0m'
+		;;
+esac
 
