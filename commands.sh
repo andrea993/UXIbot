@@ -158,6 +158,7 @@ Comandi per soli amministratori:
 /deladmin: Rimuove un admin
 /calc: Calcola con octave
 /exec: Esegue un comando sul server !!CAUTELA!!
+/log: Mostra le ultime 10 righe di log
 "
 				;;
 				'/lsadmin')
@@ -218,6 +219,8 @@ https://www.domoticz.com/wiki/Telegram_Bot#Using_Telegram_Bot_to_Send_Messages_w
 					local out=$(bash -c "$MESSAGEARG 2>&1")
 					send_message "${CHAT[ID]}" "$out"
 				;;
+				'/log')
+					send_message "${CHAT[ID]}" "$(tail -n10 log.txt)"
 			esac
 		fi
 else 
