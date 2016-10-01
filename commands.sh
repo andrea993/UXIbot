@@ -48,7 +48,7 @@ if [ "$1" = "source" ];then
 	# Set to .* to allow sending files from all locations
 	FILE_REGEX='/tmp/telegramimg.jpg'
 
-elif [ ${CHAT[ID]} == -1001059420604 ] ; then
+elif [ ${CHAT[ID]} == -1001059420604 ] || isAnAdmin "${USER[USERNAME]}"; then
 	if ! tmux ls | grep -v send | grep -q $copname; then
 		[ ! -z ${URLS[*]} ] && {
 		curl -s ${URLS[*]} -o $NAME
@@ -122,7 +122,9 @@ elif [ ${CHAT[ID]} == -1001059420604 ] ; then
 		#		send_message "${CHAT[ID]}" "$(searchYTbykey  "site:www.youtube.com "$MESSAGEARG"")"
 		#		;;
 			'/info')
-				send_message "${CHAT[ID]}" "Questo è UXIbot: il bot di Unix Italia"
+				send_message "${CHAT[ID]}" "Questo è UXIbot: il bot di @UnixItalia.
+Il bot è un fork di telegram-bash-bot
+I sorgenti software sono reperibili al seguente link: https://github.com/andrea993/UXIbot"
 				;;
 			'/start' | '/help')
 				send_message "${CHAT[ID]}" "Cordiali saluti dal bot di Unix Italia
