@@ -39,6 +39,10 @@ isAnAdmin() {
 	return $?
 }
 
+writeToLog() {
+	echo "$(date +"[%d/%b/%Y:%k:%M:%S]") USER: "${USER[@]}" CHAT: "${CHAT[@]}" MESSAGE: "${MESSAGE[@]}"" >> log.txt
+}
+
 if [ "$1" = "source" ];then
 	# Place the token in the token file
 	TOKEN=$(cat token)
@@ -49,6 +53,7 @@ if [ "$1" = "source" ];then
 	FILE_REGEX='/tmp/telegramimg.jpg'
 
 elif [ ${CHAT[ID]} == -1001059420604 ] || isAnAdmin "${USER[USERNAME]}"; then
+	writeToLog
 	if ! tmux ls | grep -v send | grep -q $copname; then
 		[ ! -z ${URLS[*]} ] && {
 		curl -s ${URLS[*]} -o $NAME
@@ -216,5 +221,6 @@ https://www.domoticz.com/wiki/Telegram_Bot#Using_Telegram_Bot_to_Send_Messages_w
 			esac
 		fi
 else 
+	writeToLog
 	send_message "${CHAT[ID]}" "Questo bot funziona soltanto su @UnixItalia"
 fi
