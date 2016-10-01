@@ -31,7 +31,7 @@ searchYTbykey() {
 	 local out=$(echo "$txt" | ./mangrep)
 	 echo -n "$out" | head -c 4000
 	 echo "..."
-	 echo "Continua a leggere su $(searchURLbykey "site:linux.die.net man $1")"
+	 echo "Continua a leggere su $(searchURLbykey "site:linux.die.net man "$1"")"
  }
 
 isAnAdmin() {
